@@ -16,6 +16,13 @@ find_package(Qt6 REQUIRED COMPONENTS Core Gui Widgets)
 set(PROJECT_SOURCES
     main.cpp
     resources.qrc
+    Definitions.h
+    Choose_Mode_Window.cpp
+    Game_Window.cpp
+    Controller.cpp
+    Controller.h
+    CMW.h 
+    GW.h
     Fences.cpp
     Pawns.cpp
     Place.cpp
