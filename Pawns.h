@@ -6,7 +6,7 @@ Q_OBJECT
 private: 
 bool Press_Id = false;  
 bool Is_Pressed = false; 
-Place * position;
+Place* position = nullptr;
 void mousePressEvent(mevent * event) override;
 bool Pawn_Id = false;
 public:
@@ -14,7 +14,7 @@ Pawns(widget * parent);
 void movepawn(Place * On);
 Place * Get_Position();
 void Set_Choosen(bool a );
-static inline bool Turn;
+static inline bool Turn = false;
 void Set_Id(bool x);
 int Get_Id();
 signals: 

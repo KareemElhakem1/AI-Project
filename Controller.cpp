@@ -89,4 +89,7 @@ bool Controller::isPlayer1Turn() const {
 
 void Controller::switchTurn() {
     p1Turn = !p1Turn;
+    Pawns::Turn = !Pawns::Turn;
 }
+int Controller::getP1Fences() const { return p1FencesLeft; }
+int Controller::getP2Fences() const { return p2FencesLeft; }

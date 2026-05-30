@@ -22,5 +22,10 @@ public:
     void switchTurn();
     bool canPlaceFence(int row, int col, bool isHorizontal);
     bool placeFence(int row, int col, bool isHorizontal);
-   // void playAITurn();
+    int getP1Fences() const;
+    int getP2Fences() const;
+    void detachWindows() {
+    Win = nullptr;
+    Game = nullptr;
+}
 };

@@ -11,18 +11,19 @@ void Pawns :: mousePressEvent(mevent * event)
     }
 }
 
-void Pawns::movepawn(Place * On)
+void Pawns::movepawn(Place* On)
 {
-    if(!Is_Pressed) return;
+    if (!Is_Pressed) return;
     point center = On->getCenter();
     int x = center.x() - (this->width() / 2);
     int y = center.y() - (this->height() / 2);
-    position->Set_Has_Pawn(false);
+    if (position != nullptr)         
+        position->Set_Has_Pawn(false);
     position = On;
     position->Set_Has_Pawn(true);
     this->move(x, y);
     Is_Pressed = false;
-    Turn = !Turn;
+    
 }
 Place * Pawns::Get_Position()
 {

@@ -15,6 +15,13 @@ class Game_Window : public widget{
     Place* boardData[9][9];
     void Game_Style(widget * home);
     Controller* myController;
+    widget * Left_Card;
+    widget* Right_Card;
+    label* P1_Fences_Label;
+    label * P2_Fences_Label;
+    label* P1_Status_Label;
+    label* P2_Status_Label;
+    Button* Main_Menu_Btn;
     protected:
     void paintEvent(QPaintEvent* event) override {
         QStyleOption opt;
@@ -22,10 +29,13 @@ class Game_Window : public widget{
         QPainter p(this);
         style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
     }
+
     public:
     explicit Game_Window(Controller*  Master_Controller, QWidget *parent = nullptr);
     void showEvent(QShowEvent* event);
     public slots:
     void Valid_Moves(Pawns * P );
     void Clean_V();
+    void Update_UI();
+    void Trigger_Win(int winner_player);
 };

@@ -10,11 +10,14 @@ Fences::Fences(int r, int c, bool horizontal, QWidget* parent)
 }
 
 void Fences::mousePressEvent(QMouseEvent* event) {
+    
+    
     emit fenceClicked(this); 
 }
 
 void Fences::placeVisually() {
     this->setStyleSheet("background-color: #8B4513;"); // Brown
+     this->raise(); 
 }
 
 // Add these implementations at the bottom!
