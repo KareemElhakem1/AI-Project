@@ -2,6 +2,7 @@
 #include "Definitions.h"
 #include "Pawns.h"
 #include "Place.h"
+#include "Controller.h"
 #include <QPainter>
 #include <QStyleOption>
 class Game_Window : public widget{
@@ -13,6 +14,7 @@ class Game_Window : public widget{
     Pawns* P2;
     Place* boardData[9][9];
     void Game_Style(widget * home);
+    Controller* myController;
     protected:
     void paintEvent(QPaintEvent* event) override {
         QStyleOption opt;
@@ -21,9 +23,9 @@ class Game_Window : public widget{
         style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
     }
     public:
-    Game_Window();
+    explicit Game_Window(Controller*  Master_Controller, QWidget *parent = nullptr);
     void showEvent(QShowEvent* event);
     public slots:
-    void Valid_Moves(Pawns * P);
-    
+    void Valid_Moves(Pawns * P );
+    void Clean_V();
 };

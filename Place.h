@@ -1,20 +1,28 @@
 #pragma once
 #include "Definitions.h"
 class Place : public widget {
+    Q_OBJECT
 private:
-    bool has_pawn;
-    QPoint center_point = this->geometry().center(); 
+    bool Has_Pawn =false;
+    point center_point = this->geometry().center(); 
     int row;
     int col;
     bool Available = false;
+    void mousePressEvent(mevent * event) override;
 public:
+    Place(Place * a);
     Place(int r = 0, int c = 0, widget *parent = nullptr);
     bool hasPawn() const;
     void setPawn(bool status);
     point  getCenter() const;
     int getRow() const;
     int getCol() const;
-    void Change_Color();
-    void Set_Available();
-    
+    void Change_Color(bool a);
+    void Set_Available(bool b);
+    bool Get_Available();
+    void Set_Has_Pawn(bool x);
+    bool Get_Has_Pawn();
+signals:
+void Move_Pawn(Place * a);
+void Clean();    
 };
