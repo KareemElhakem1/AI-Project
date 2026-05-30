@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <utility>
+#include "Pawns.h"
 class Choose_Mode_Window;
 class Game_Window;
 
@@ -13,6 +14,7 @@ private:
     bool vFences[8][8]; // Vertical fences
     int p1FencesLeft;
     int p2FencesLeft;
+    
 
 public:
     Controller();
@@ -24,6 +26,8 @@ public:
     bool placeFence(int row, int col, bool isHorizontal);
     int getP1Fences() const;
     int getP2Fences() const;
+    Place* boardData[9][9] = {nullptr , nullptr};
+    void Pawn_Meet(int row , int col , int Relative , vector<pair<int, int>>& valid_moves);
     void detachWindows() {
     Win = nullptr;
     Game = nullptr;

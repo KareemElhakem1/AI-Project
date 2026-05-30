@@ -40,23 +40,13 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
 
     auto Pawn_Motion_Connection = [this](Place * a , Pawns * pawn ){
         connect(a, &Place::Move_Pawn, this, [this, pawn, a]() {
-            
-            // 1. Remember where the pawn was before the click
             Place* oldPos = pawn->Get_Position();
-            
-            // 2. Try to move it
             pawn->movepawn(a); 
-            
-            // 3. ONLY proceed if the pawn ACTUALLY moved!
-            // This stops the double-execution bug instantly.
             if (pawn->Get_Position() == a && oldPos != a) {
-                this->Clean_V();   
-                
+                this->Clean_V();          
                 if (myController) {
-                    myController->switchTurn(); // Keeps fences and pawns perfectly in sync!
+                    myController->switchTurn(); 
                 }
-                
-                // 4. Safe Win Detection (Only checks the pawn that just moved)
                 if (pawn == P1 && a->getRow() == 0) {
                     this->Trigger_Win(1);
                 } else if (pawn == P2 && a->getRow() == 8) {
@@ -66,16 +56,13 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
         });
     };
     auto Clean_Valid = [this] (Place * a){connect(a ,&Place::Clean , this , &Game_Window::Clean_V);};
-    
     auto Fence_Connection = [this](Fences * f){
         connect(f, &Fences::fenceClicked, this, [this](Fences* clickedFence) {
             if (myController == nullptr || clickedFence == nullptr) return; 
-
             bool success = myController->placeFence(clickedFence->getRow(), clickedFence->getCol(), clickedFence->getIsHorizontal());
             if (success) {
                 clickedFence->placeVisually(); 
-                this->Update_UI();
-               
+                this->Update_UI();  
                 P1->Set_Choosen(false); 
                 P2->Set_Choosen(false); 
                 this->Clean_V();        
@@ -87,7 +74,7 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
         for (int col = 8; col >= 0; col--) {
             Place* square = new Place(row, col, this);
             Board_Layout->addWidget(square, row * 2, col * 2); 
-            boardData[row][col] = square; 
+            myController->boardData[row][col] = square; 
             Pawn_Motion_Connection(square, P1);
             Pawn_Motion_Connection(square, P2);
             Clean_Valid(square);
@@ -217,16 +204,16 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
 void Game_Window::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
     QTimer::singleShot(0, this, [this]() {
-        if (boardData[8][4] != nullptr) {
+        if (myController->boardData[8][4] != nullptr) {
             P1->Set_Choosen(true);
-            P1->movepawn(boardData[8][4]);
+            P1->movepawn(myController->boardData[8][4]);
             P1->raise();
             P2->Set_Id(true);
         }
-        if(boardData[0][4] != nullptr)
+        if(myController->boardData[0][4] != nullptr)
         {
             P2->Set_Choosen(true);
-            P2->movepawn(boardData[0][4]);
+            P2->movepawn(myController->boardData[0][4]);
             P2->raise();
         }
     });
@@ -251,9 +238,9 @@ void Game_Window::Valid_Moves(Pawns * P)
     for (auto coord : valid_coords) {
         int r = coord.first;
         int c = coord.second;
-        if(boardData[r][c]->Get_Has_Pawn()) continue; 
-        boardData[r][c]->Change_Color(true);
-        boardData[r][c]->Set_Available(true);
+        if(myController->boardData[r][c]->Get_Has_Pawn()) continue; 
+       myController-> boardData[r][c]->Change_Color(true);
+        myController->boardData[r][c]->Set_Available(true);
     }
 }
 
@@ -263,10 +250,10 @@ void Game_Window::Clean_V()
     {
         for(int j =0 ; j < 9 ; j++)
         {
-            if(boardData[i][j]->Get_Available())
+            if(myController->boardData[i][j]->Get_Available())
             {
-                boardData[i][j]->Set_Available(false);
-                boardData[i][j]->Change_Color(false);
+                myController->boardData[i][j]->Set_Available(false);
+                myController->boardData[i][j]->Change_Color(false);
             }
         }
     }

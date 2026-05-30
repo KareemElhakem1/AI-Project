@@ -12,7 +12,7 @@ class Game_Window : public widget{
     hbox * Master_Layout;
     Pawns* P1;
     Pawns* P2;
-    Place* boardData[9][9];
+    
     void Game_Style(widget * home);
     Controller* myController;
     widget * Left_Card;
