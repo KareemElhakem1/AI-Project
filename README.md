@@ -8,3 +8,12 @@ Quoridor is a 2-player strategy board game played on a 9×9 grid. Each player st
 #Screenshots
 
 ![alt text](image.png)
+Play Against your friend mode:
+![alt text](image-1.png)
+When you press on your pawn in your turn, you can see your valid moves
+![alt text](image-2.png)
+Jumping behind the pawn
+![alt text](image-3.png)
+![alt text](image-4.png)
+If there is a wall behind the other player
+![alt text](image-5.png)

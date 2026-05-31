@@ -137,52 +137,77 @@ int Controller::getP2Fences() const { return p2FencesLeft; }
 void Controller::Pawn_Meet(int row, int col, int Relative, vector<pair<int, int>>& valid_moves)
 {
     switch (Relative) {
-        case 0: 
+        case 0:
         {
-            bool blocked = (col < 8 && hFences[row-2][col]) || (col > 0 && hFences[row-2][col-1]);
-            if (!blocked) { valid_moves.push_back({row-2, col}); break; }
+            
+            bool straightBlocked = (row < 2) || (col < 8 && hFences[row-2][col]) || (col > 0 && hFences[row-2][col-1]);
+            
+            if (!straightBlocked) { 
+                valid_moves.push_back({row-2, col}); 
+                break; 
+            }
 
-            bool rightBlocked = (col >= 8) || (vFences[row-1][col]   || vFences[row][col]);
-            bool leftBlocked  = (col <= 0) || (vFences[row-1][col-1] || vFences[row][col-1]);
+            bool rightBlocked = (col >= 8) || (row-1 < 8 && vFences[row-1][col])   || (row-1 > 0 && vFences[row-2][col]);
+            bool leftBlocked  = (col <= 0) || (row-1 < 8 && vFences[row-1][col-1]) || (row-1 > 0 && vFences[row-2][col-1]);
 
-            if (!rightBlocked) valid_moves.push_back({row-1, col+1});
-            if (!leftBlocked)  valid_moves.push_back({row-1, col-1});
+            if (!rightBlocked && !boardData[row-1][col+1]->Get_Has_Pawn()) 
+                valid_moves.push_back({row-1, col+1});
+            if (!leftBlocked  && !boardData[row-1][col-1]->Get_Has_Pawn())  
+                valid_moves.push_back({row-1, col-1});
             break;
         }
-        case 1: 
+        case 1:
         {
-            bool blocked = (col < 8 && hFences[row+1][col]) || (col > 0 && hFences[row+1][col-1]);
-            if (!blocked) { valid_moves.push_back({row+2, col}); break; }
+            bool straightBlocked = (row > 6) || (col < 8 && hFences[row+1][col]) || (col > 0 && hFences[row+1][col-1]);
+            
+            if (!straightBlocked) { 
+                valid_moves.push_back({row+2, col}); 
+                break; 
+            }
 
-            bool rightBlocked = (col >= 8) || (vFences[row][col]   || vFences[row+1][col]);
-            bool leftBlocked  = (col <= 0) || (vFences[row][col-1] || vFences[row+1][col-1]);
+            bool rightBlocked = (col >= 8) || (row+1 < 8 && vFences[row+1][col])   || (row+1 > 0 && vFences[row][col]);
+            bool leftBlocked  = (col <= 0) || (row+1 < 8 && vFences[row+1][col-1]) || (row+1 > 0 && vFences[row][col-1]);
 
-            if (!rightBlocked) valid_moves.push_back({row+1, col+1});
-            if (!leftBlocked)  valid_moves.push_back({row+1, col-1});
+            if (!rightBlocked && !boardData[row+1][col+1]->Get_Has_Pawn()) 
+                valid_moves.push_back({row+1, col+1});
+            if (!leftBlocked  && !boardData[row+1][col-1]->Get_Has_Pawn())  
+                valid_moves.push_back({row+1, col-1});
             break;
         }
         case 2: 
         {
-            bool blocked = (row < 8 && vFences[row][col-2]) || (row > 0 && vFences[row-1][col-2]);
-            if (!blocked) { valid_moves.push_back({row, col-2}); break; }
+            bool straightBlocked = (col < 2) || (row < 8 && vFences[row][col-2]) || (row > 0 && vFences[row-1][col-2]);
+            
+            if (!straightBlocked) { 
+                valid_moves.push_back({row, col-2}); 
+                break; 
+            }
 
-            bool upBlocked   = (row <= 0) || (hFences[row-1][col-1] || hFences[row-1][col]);
-            bool downBlocked = (row >= 8) || (hFences[row][col-1]   || hFences[row][col]);
+            bool upBlocked   = (row <= 0) || (col-1 < 8 && hFences[row-1][col-1]) || (col-1 > 0 && hFences[row-1][col-2]);
+            bool downBlocked = (row >= 8) || (col-1 < 8 && hFences[row][col-1])   || (col-1 > 0 && hFences[row][col-2]);
 
-            if (!upBlocked)   valid_moves.push_back({row-1, col-1});
-            if (!downBlocked) valid_moves.push_back({row+1, col-1});
+            if (!upBlocked   && !boardData[row-1][col-1]->Get_Has_Pawn()) 
+                valid_moves.push_back({row-1, col-1});
+            if (!downBlocked && !boardData[row+1][col-1]->Get_Has_Pawn()) 
+                valid_moves.push_back({row+1, col-1});
             break;
         }
-        case 3: 
+        case 3:
         {
-            bool blocked = (row < 8 && vFences[row][col+1]) || (row > 0 && vFences[row-1][col+1]);
-            if (!blocked) { valid_moves.push_back({row, col+2}); break; }
+            bool straightBlocked = (col > 6) || (row < 8 && vFences[row][col+1]) || (row > 0 && vFences[row-1][col+1]);
+            
+            if (!straightBlocked) { 
+                valid_moves.push_back({row, col+2}); 
+                break; 
+            }
 
-            bool upBlocked   = (row <= 0) || (hFences[row-1][col+1] || hFences[row-1][col]);
-            bool downBlocked = (row >= 8) || (hFences[row][col+1]   || hFences[row][col]);
+            bool upBlocked   = (row <= 0) || (col+1 < 8 && hFences[row-1][col+1]) || (col+1 > 0 && hFences[row-1][col]);
+            bool downBlocked = (row >= 8) || (col+1 < 8 && hFences[row][col+1])   || (col+1 > 0 && hFences[row][col]);
 
-            if (!upBlocked)   valid_moves.push_back({row-1, col+1});
-            if (!downBlocked) valid_moves.push_back({row+1, col+1});
+            if (!upBlocked   && !boardData[row-1][col+1]->Get_Has_Pawn()) 
+                valid_moves.push_back({row-1, col+1});
+            if (!downBlocked && !boardData[row+1][col+1]->Get_Has_Pawn()) 
+                valid_moves.push_back({row+1, col+1});
             break;
         }
     }

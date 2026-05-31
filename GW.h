@@ -36,10 +36,11 @@ class Game_Window : public widget{
     public:
     explicit Game_Window(Controller*  Master_Controller, widget *parent = nullptr);
     void showEvent(QShowEvent* event);
+    bool gameStarted = false;
     public slots:
     void Valid_Moves(Pawns * P );
     void Clean_V();
     void Update_UI();
     void Trigger_Win(int winner_player);
-    
+   
 };

@@ -8,6 +8,7 @@ void Pawns :: mousePressEvent(mevent * event)
 {
     if(Parent == nullptr) return;
     if (event->button() == LeftButton && Press_Id == Turn) {
+        
         Is_Pressed = true;    
         emit pawnClicked(this);
     }

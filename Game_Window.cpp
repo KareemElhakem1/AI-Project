@@ -35,7 +35,7 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
     Board_Layout->setVerticalSpacing(0);
     Board_Layout->setHorizontalSpacing(0); 
 
-    auto Pawn_Connection = [this](Pawns * Pawn ){connect(Pawn, &Pawns::pawnClicked, this, [this ](Pawns* p ) {
+    auto Pawn_Connection = [this](Pawns * Pawn ){connect(Pawn, &Pawns::pawnClicked, this, [this ](Pawns* p ) {      
         this->Valid_Moves(p);
     });}; 
 
@@ -284,6 +284,8 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
 
 void Game_Window::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
+    if (gameStarted) return;
+    gameStarted = true;
     QTimer::singleShot(0, this, [this]() {
         if (myController->boardData[8][4] != nullptr) {
             P1->Set_Choosen(true);
