@@ -1,17 +1,14 @@
 #include "Controller.h"
 #include "GW.h"
 #include "CMW.h"
-
+#include <queue>
 Controller::Controller() {
     Win = nullptr;
     Game = nullptr;
-    p1Turn = true; // Player 1 starts
-    
-    // Initialize players with 10 fences each
+    p1Turn = true; 
+
     p1FencesLeft = 10;
     p2FencesLeft = 10;
-
-    // Initialize all fence slots to empty (false)
     for(int r = 0; r < 8; r++) {
         for(int c = 0; c < 8; c++) {
             hFences[r][c] = false;
@@ -45,16 +42,31 @@ bool Controller::canPlaceFence(int r, int c, bool isHorizontal) {
     return true;
 }
 
-bool Controller::placeFence(int r, int c, bool isHorizontal) {
+bool Controller::placeFence(int r, int c, bool isHorizontal, bool playerPlacingFence , Pawns * p1 , Pawns * p2) {
+    if (playerPlacingFence == false && p1FencesLeft <= 0) {
+        return false; 
+    } 
+    else if (playerPlacingFence == true && p2FencesLeft <= 0) {
+        return false;
+    }
     if (!canPlaceFence(r, c, isHorizontal)) return false;
     if (isHorizontal) {
         hFences[r][c] = true;
     } else {
         vFences[r][c] = true;
     }
-    if (p1Turn) p1FencesLeft--;
-    else p2FencesLeft--;
+    if (playerPlacingFence == false) {
+        p1FencesLeft--;
+    } else {
+        p2FencesLeft--;
+    }
+    if(!(BFS(p1) && BFS(p2))) 
+    {
+    undoFence(r , c , isHorizontal , playerPlacingFence);
     switchTurn();
+    Show_Invalid_window();
+    return false;
+    }
     return true;
 }
 vector<pair<int, int>> Controller::getValidMoves(int row, int col) {
@@ -156,4 +168,103 @@ void Controller::Pawn_Meet(int row, int col, int Relative, vector<pair<int, int>
             break;
         }
     }
+}
+bool Controller :: BFS( Pawns * P  )
+{
+    
+    if(P->Get_Position() == nullptr){qDebug() << "  -> BFS Aborted: Pawn position is nullptr."; return true;}
+    
+    vector <pair<int , int >> neighbours ;
+    Place * Current = nullptr;
+    int Finish = P->Get_Finish();
+    Place * start = P->Get_Position();
+    int Row;
+    int Col ;
+    
+    for(int i =0 ; i < 9 ; i++)
+    {
+        for(int j =0 ; j < 9 ; j++)
+        {
+            boardData[i][j]->Set_Mark(false);
+        }
+    }
+   
+    queue <Place *> To_Visit;
+    To_Visit.push(start);
+    start->Set_Mark(true);
+    
+    int a , b;
+    while(!To_Visit.empty())
+    {
+        if(To_Visit.front()->getRow() == Finish) return true; 
+        Current = To_Visit.front();
+        Row = Current->getRow();
+        Col = Current->getCol(); 
+        To_Visit.pop();
+        neighbours = getValidMoves(Row , Col);
+        for(int i = 0; i < neighbours.size(); i++)
+            {
+                a = neighbours[i].first;
+                b = neighbours[i].second;
+                if (a < 0 || a > 8 || b < 0 || b > 8) {
+                continue; 
+            }
+                if(!boardData[a][b]->Get_Mark())
+                {
+                     boardData[a][b]->Set_Mark(true);
+                     To_Visit.push(boardData[a][b]);
+                }
+            }
+    }
+    return false;
+}
+void Controller::recordPawnMove(Pawns* p, Place* oldPlace, Place* newPlace) 
+{
+    Move newMove(p, oldPlace, newPlace);
+    moveStack.push(newMove);
+    
+ 
+    while(!redoStack.empty()) redoStack.pop(); 
+}
+
+void Controller::recordFenceMove(Fences* f, bool playerTurn) 
+{
+    Move newMove(f, playerTurn);
+    moveStack.push(newMove);
+    
+    
+    while(!redoStack.empty()) redoStack.pop();
+}
+
+Move Controller::popLastMove() 
+{
+    Move last = moveStack.top();
+    moveStack.pop();
+    return last;
+}
+void Controller::undoFence(int r, int c, bool isH, bool playerTurn) 
+{
+    if (isH) {
+        hFences[r][c] = false;
+    } else {
+        vFences[r][c] = false;
+    }
+    if (playerTurn == false) {
+        p1FencesLeft++;
+        return;
+    } 
+    p2FencesLeft++;
+    
+}
+void Controller::Show_Invalid_window()
+{
+    Invalid_Placement_Widget = new widget();
+    Invalid_Placement_Widget->setWindowTitle("Invalid Placement Error");
+    Invalid_Placement_Widget->setWindowIcon(QIcon(":/Images/Icon.png"));
+    Invalid_Placement_Widget->setFixedSize(400 , 100);
+    Invalid_Placemnt_Label = new label( Invalid_Placement_Widget);
+    Invalid_Placemnt_Label->setText("  This is placement is invalid  <br> as it prevents a player from reaching the baseline of their opponent");
+    Invalid_Placemnt_Label->setAlignment(AlignCenter);
+    Invalid_Placemnt_Label->setStyleSheet("font-weight: bold;");
+    Invalid_Placement_Widget->show();
 }

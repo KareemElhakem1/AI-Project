@@ -22,6 +22,8 @@ class Game_Window : public widget{
     label* P1_Status_Label;
     label* P2_Status_Label;
     Button* Main_Menu_Btn;
+    Button* Undo_Btn;
+    Button* Redo_Btn;
     protected:
     void paintEvent(QPaintEvent* event) override {
         QStyleOption opt;
@@ -31,7 +33,7 @@ class Game_Window : public widget{
     }
 
     public:
-    explicit Game_Window(Controller*  Master_Controller, QWidget *parent = nullptr);
+    explicit Game_Window(Controller*  Master_Controller, widget *parent = nullptr);
     void showEvent(QShowEvent* event);
     public slots:
     void Valid_Moves(Pawns * P );

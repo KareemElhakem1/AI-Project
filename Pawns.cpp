@@ -11,9 +11,9 @@ void Pawns :: mousePressEvent(mevent * event)
     }
 }
 
-void Pawns::movepawn(Place* On)
+void Pawns::movepawn(Place* On , bool undo)
 {
-    if (!Is_Pressed) return;
+    if (!Is_Pressed && !undo) return;
     point center = On->getCenter();
     int x = center.x() - (this->width() / 2);
     int y = center.y() - (this->height() / 2);
@@ -40,4 +40,12 @@ void Pawns :: Set_Id(bool x)
 int Pawns::Get_Id()
 {
     return Press_Id;
+}
+int Pawns::Get_Finish()
+{
+    return Finish_Row;
+}
+void Pawns::Set_Finish(int x)
+{
+    Finish_Row = x;
 }

@@ -16,11 +16,9 @@ void Fences::mousePressEvent(QMouseEvent* event) {
 }
 
 void Fences::placeVisually() {
-    this->setStyleSheet("background-color: #8B4513;"); // Brown
+    this->setStyleSheet("background-color: #8B4513;"); 
      this->raise(); 
 }
-
-// Add these implementations at the bottom!
 int Fences::getRow() const {
     return row;
 }
@@ -31,4 +29,8 @@ int Fences::getCol() const {
 
 bool Fences::getIsHorizontal() const {
     return isHorizontal;
+}
+void Fences::resetVisually()
+{
+    this->setStyleSheet("background-color: transparent;"); 
 }

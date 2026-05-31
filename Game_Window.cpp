@@ -8,8 +8,8 @@
 
 bool Started = false;
 
-Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
-    : QWidget(parent)
+Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
+    : widget(parent)
 {
     myController = Master_Controller;
     this->setWindowTitle("Game Window");
@@ -20,7 +20,7 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
 
     P1 = new Pawns(this);
     P2 = new Pawns(this);
-   
+    P2->Set_Finish(8);
     P1->setAttribute(Qt::WA_StyledBackground, true);
     P2->setAttribute(Qt::WA_StyledBackground, true);
     P1->setFixedSize(40, 40);
@@ -41,8 +41,9 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
     auto Pawn_Motion_Connection = [this](Place * a , Pawns * pawn ){
         connect(a, &Place::Move_Pawn, this, [this, pawn, a]() {
             Place* oldPos = pawn->Get_Position();
-            pawn->movepawn(a); 
+            pawn->movepawn(a , false); 
             if (pawn->Get_Position() == a && oldPos != a) {
+                myController->recordPawnMove(pawn, oldPos , a);
                 this->Clean_V();          
                 if (myController) {
                     myController->switchTurn(); 
@@ -59,13 +60,21 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
     auto Fence_Connection = [this](Fences * f){
         connect(f, &Fences::fenceClicked, this, [this](Fences* clickedFence) {
             if (myController == nullptr || clickedFence == nullptr) return; 
-            bool success = myController->placeFence(clickedFence->getRow(), clickedFence->getCol(), clickedFence->getIsHorizontal());
+            bool Fence_Owner = Pawns::Turn;
+
+            bool success = myController->placeFence(clickedFence->getRow(), clickedFence->getCol(), clickedFence->getIsHorizontal() , Fence_Owner, P1 , P2);
+            
             if (success) {
+                myController->recordFenceMove(clickedFence, Fence_Owner);
                 clickedFence->placeVisually(); 
+                
                 this->Update_UI();  
                 P1->Set_Choosen(false); 
                 P2->Set_Choosen(false); 
-                this->Clean_V();        
+       
+                this->Clean_V(); 
+                myController->switchTurn();       
+                
             }
         });
     };
@@ -121,21 +130,75 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
 
     P1_Fences_Label = new label("Fences: 10", Left_Middle);
     P1_Fences_Label->setStyleSheet("color: white; font-size: 20px; background: transparent;");
-    P1_Fences_Label->setAlignment(Qt::AlignCenter);
+    P1_Fences_Label->setAlignment(AlignCenter);
 
     Left_Middle_Layout->addWidget(P1_Name);
     Left_Middle_Layout->addWidget(P1_Fences_Label);
 
     widget* Left_Bottom = new widget(Left);
     Left_Bottom->setStyleSheet("background: transparent;");
-    vbox* Left_Bottom_Layout = new vbox(Left_Bottom);
-    
+    vbox* Left_Bottom_Container = new vbox(Left_Bottom);
+    hbox* Left_Bottom_Layout = new hbox(Left_Bottom); 
+
     Main_Menu_Btn = new Button("Main Menu", Left_Bottom);
     Main_Menu_Btn->setFixedSize(120, 40);
     Main_Menu_Btn->setStyleSheet("background-color: #333; color: white; font-weight: bold; border-radius: 10px;");
-    Main_Menu_Btn->hide(); 
-    
-    Left_Bottom_Layout->addWidget(Main_Menu_Btn, 0, Qt::AlignBottom | Qt::AlignLeft);
+
+    Undo_Btn = new Button("Undo", Left_Bottom);
+    Undo_Btn->setFixedSize(80, 40);
+    Undo_Btn->setStyleSheet("background-color: #e6b800; color: black; font-weight: bold; border-radius: 10px;");
+    Left_Bottom_Layout->addWidget(Undo_Btn);
+
+    Redo_Btn = new Button("Redo", Left_Bottom);
+    Redo_Btn->setFixedSize(80, 40);
+    Redo_Btn->setStyleSheet("background-color: #e6b800; color: black; font-weight: bold; border-radius: 10px;");
+    Left_Bottom_Layout->addWidget(Redo_Btn);
+
+    Left_Bottom_Container->addLayout(Left_Bottom_Layout);
+    Left_Bottom_Container->addWidget(Main_Menu_Btn);
+
+    connect(Undo_Btn, &Button::clicked, this, [this]() {
+        if (myController == nullptr || myController->moveStack.empty()) return; 
+        Move lastMove = myController->popLastMove();
+        myController->redoStack.push(lastMove);
+        if (!lastMove.isFence) {
+            lastMove.movedPawn->movepawn(lastMove.oldPlace , true);
+            P1_Status_Label->setText("");
+            P2_Status_Label->setText("");
+        } 
+        else {
+            lastMove.placedFence->resetVisually(); 
+            myController->undoFence(lastMove.placedFence->getRow(), 
+                                    lastMove.placedFence->getCol(), 
+                                    lastMove.placedFence->getIsHorizontal(), 
+                                    lastMove.playerTurn);
+        }
+        myController->switchTurn();
+        this->Clean_V();
+        this->Update_UI();
+    });
+    connect(Redo_Btn, &Button::clicked, this, [this]() {
+        if (myController == nullptr || myController->redoStack.empty()) return; 
+        Move redoMove = myController->redoStack.top();
+        myController->redoStack.pop();
+        myController->moveStack.push(redoMove);
+
+ 
+        if (!redoMove.isFence) {
+            redoMove.movedPawn->movepawn(redoMove.newPlace, true); 
+            redoMove.movedPawn->raise(); 
+        } 
+        else {
+            myController->placeFence(redoMove.placedFence->getRow(), 
+                                     redoMove.placedFence->getCol(), 
+                                     redoMove.placedFence->getIsHorizontal(),
+                                     redoMove.playerTurn , P1 , P2);
+            redoMove.placedFence->placeVisually(); 
+        }
+        myController->switchTurn();
+        this->Clean_V();
+        this->Update_UI();
+    });
 
     connect(Main_Menu_Btn, &Button::clicked, this, [this]() {
     Main_Menu_Btn->setEnabled(false);
@@ -173,13 +236,13 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
     
     label * P2_Name = new label("Player 2", Right_Middle);
     P2_Name->setStyleSheet("color: #f54803; font-size: 26px; font-weight: bold; background: transparent;");
-    P2_Name->setAlignment(Qt::AlignCenter);
+    P2_Name->setAlignment(AlignCenter);
 
     P2_Fences_Label = new label("Fences: 10", Right_Middle);
     P2_Fences_Label->setStyleSheet("color: white; font-size: 20px; background: transparent;");
-    P2_Fences_Label->setAlignment(Qt::AlignCenter);
+    P2_Fences_Label->setAlignment(AlignCenter);
     P2_Status_Label = new label("", Right_Middle); 
-    P2_Status_Label->setAlignment(Qt::AlignCenter);
+    P2_Status_Label->setAlignment(AlignCenter);
 
     Right_Middle_Layout->addWidget(P2_Status_Label);
     Right_Middle_Layout->addWidget(P2_Name);
@@ -191,7 +254,7 @@ Game_Window::Game_Window(Controller* Master_Controller, QWidget *parent)
     Right_VBox->addWidget(Right_Top);
     Right_VBox->addWidget(Right_Middle);
     Right_VBox->addWidget(Right_Bottom);
-    
+
     Master_Layout->addWidget(Left);
     Master_Layout->addLayout(Board_Layout);
     Master_Layout->addWidget(Right);
@@ -206,14 +269,14 @@ void Game_Window::showEvent(QShowEvent* event) {
     QTimer::singleShot(0, this, [this]() {
         if (myController->boardData[8][4] != nullptr) {
             P1->Set_Choosen(true);
-            P1->movepawn(myController->boardData[8][4]);
+            P1->movepawn(myController->boardData[8][4] , true);
             P1->raise();
             P2->Set_Id(true);
         }
         if(myController->boardData[0][4] != nullptr)
         {
             P2->Set_Choosen(true);
-            P2->movepawn(myController->boardData[0][4]);
+            P2->movepawn(myController->boardData[0][4] , true);
             P2->raise();
         }
     });
@@ -234,7 +297,7 @@ void Game_Window::Valid_Moves(Pawns * P)
     int row = Current->getRow();
     int col = Current->getCol();
     
-    std::vector<std::pair<int, int>> valid_coords = myController->getValidMoves(row, col);
+    vector<pair<int, int>> valid_coords = myController->getValidMoves(row, col);
     for (auto coord : valid_coords) {
         int r = coord.first;
         int c = coord.second;

@@ -29,6 +29,7 @@ set(PROJECT_SOURCES
     Place.h
     Fences.h
     Pawns.h   
+    Moves.h
 )
 
 qt_add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})

@@ -1,7 +1,7 @@
 #include "Place.h"
 
 Place::Place(int r, int c, widget *parent) 
-    : QWidget(parent), Has_Pawn(false), row(r), col(c) 
+    : widget(parent), Has_Pawn(false), row(r), col(c) 
 {
     this->setFixedSize(50, 50);
     this->setAttribute(Qt::WA_StyledBackground, true);
@@ -55,4 +55,10 @@ void Place:: Set_Has_Pawn( bool x){
 bool Place::Get_Has_Pawn()
 {
     return Has_Pawn;
+}
+bool Place:: Get_Mark(){
+ return Marked;
+}
+void Place::Set_Mark(bool a){
+    Marked = a ;
 }

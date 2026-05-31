@@ -7,7 +7,7 @@ class Fences : public QLabel {
 private:
     int row, col;
     bool isHorizontal;
-
+    
 public:
     Fences(int r, int c, bool horizontal, QWidget* parent = nullptr);
     
@@ -15,9 +15,9 @@ public:
     int getRow() const;
     int getCol() const;
     bool getIsHorizontal() const;
-
     void placeVisually(); 
-
+    void resetVisually();
+    
 signals:
     void fenceClicked(Fences* f); 
 

@@ -9,6 +9,7 @@ private:
     int col;
     bool Available = false;
     void mousePressEvent(mevent * event) override;
+    bool Marked = false;
 public:
     Place(Place * a);
     Place(int r = 0, int c = 0, widget *parent = nullptr);
@@ -22,6 +23,8 @@ public:
     bool Get_Available();
     void Set_Has_Pawn(bool x);
     bool Get_Has_Pawn();
+    bool Get_Mark();
+    void Set_Mark(bool);
 signals:
 void Move_Pawn(Place * a);
 void Clean();    
