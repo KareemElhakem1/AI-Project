@@ -29,11 +29,3 @@ using namespace std;
 #define point QPoint
 #define Grid QGridLayout 
 using namespace Qt;
-inline void Switch_Window(Button* a , widget* first, widget* second){
-    QObject::connect(a, &Button::clicked, [=]() {
-    if (first != nullptr && second != nullptr) {
-        first->hide();
-        second->show();
-    }
-}); 
-}

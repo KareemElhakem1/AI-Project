@@ -14,7 +14,6 @@ public:
     Place(Place * a);
     Place(int r = 0, int c = 0, widget *parent = nullptr);
     bool hasPawn() const;
-    void setPawn(bool status);
     point  getCenter() const;
     int getRow() const;
     int getCol() const;
@@ -26,6 +25,6 @@ public:
     bool Get_Mark();
     void Set_Mark(bool);
 signals:
-void Move_Pawn(Place * a);
+void Move_Pawn(Place * a , bool x);
 void Clean();    
 };

@@ -15,10 +15,6 @@ bool Place::hasPawn() const {
     return Has_Pawn;
 }
 
-void Place::setPawn(bool status) {
-    Has_Pawn = status;
-}
-
 point  Place::getCenter() const {
     return this->geometry().center();
 }
@@ -40,8 +36,7 @@ void Place :: mousePressEvent(mevent * event)
 {
     if(this->Available == true )
     {
-    
-        emit Move_Pawn(this);
+        emit Move_Pawn(this , false);
         emit Clean();
     }
 }

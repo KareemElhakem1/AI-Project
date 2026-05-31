@@ -10,10 +10,12 @@ Place* position = nullptr;
 int Finish_Row = 0;
 void mousePressEvent(mevent * event) override;
 bool Pawn_Id = false;
+widget * Parent = nullptr;
 public:
 Pawns(widget * parent);
 void movepawn(Place * On , bool undo);
 Place * Get_Position();
+void Set_Position(Place * a);
 void Set_Choosen(bool a );
 static inline bool Turn = false;
 void Set_Id(bool x);

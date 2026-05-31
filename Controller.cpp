@@ -6,7 +6,7 @@ Controller::Controller() {
     Win = nullptr;
     Game = nullptr;
     p1Turn = true; 
-
+    AI_Mode = false;
     p1FencesLeft = 10;
     p2FencesLeft = 10;
     for(int r = 0; r < 8; r++) {
@@ -22,9 +22,26 @@ void Controller::start()
     Win = new Choose_Mode_Window();
     Game = new Game_Window(this);
     Win->show();
-    Switch_Window(Win->get_button(), Win, Game);
+    Switch_Window(Win->get_button(true), Win->get_button(false), Win, Game);
 } 
-
+void Controller::Switch_Window(Button* a , Button * b ,  widget* first, widget* second){
+ QObject::connect(a, &Button::clicked, [=]() {
+    if (first != nullptr && second != nullptr) {
+        AI_Mode = false;
+        cout <<"False";
+        first->hide();
+        second->show();
+    }
+   }); 
+ QObject::connect(b, &Button::clicked, [=]() {
+    if (first != nullptr && second != nullptr) {
+        AI_Mode = true;
+        if (AI_Mode) cout <<"aaa9";
+        first->hide();
+        second->show();
+    }
+});
+}
 bool Controller::canPlaceFence(int r, int c, bool isHorizontal) {
     if (r < 0 || r > 7 || c < 0 || c > 7) return false;
     if (isHorizontal) {
@@ -60,7 +77,7 @@ bool Controller::placeFence(int r, int c, bool isHorizontal, bool playerPlacingF
     } else {
         p2FencesLeft--;
     }
-    if(!(BFS(p1) && BFS(p2))) 
+    if(!(BFS(p1).first && BFS(p2).first)) 
     {
     undoFence(r , c , isHorizontal , playerPlacingFence);
     switchTurn();
@@ -113,6 +130,7 @@ bool Controller::isPlayer1Turn() const {
 void Controller::switchTurn() {
     p1Turn = !p1Turn;
     Pawns::Turn = !Pawns::Turn;
+    if(Pawns::Turn == true && AI_Mode) AI_Algorithm( p1 , p2);
 }
 int Controller::getP1Fences() const { return p1FencesLeft; }
 int Controller::getP2Fences() const { return p2FencesLeft; }
@@ -169,15 +187,12 @@ void Controller::Pawn_Meet(int row, int col, int Relative, vector<pair<int, int>
         }
     }
 }
-bool Controller :: BFS( Pawns * P  )
+pair<bool , int> Controller :: BFS( Pawns * P  )
 {
-    
-    if(P->Get_Position() == nullptr){qDebug() << "  -> BFS Aborted: Pawn position is nullptr."; return true;}
-    
     vector <pair<int , int >> neighbours ;
-    Place * Current = nullptr;
+    pair <Place *, int> Current ;
     int Finish = P->Get_Finish();
-    Place * start = P->Get_Position();
+    pair <Place * , int> start = {P->Get_Position() , 0};
     int Row;
     int Col ;
     
@@ -189,17 +204,17 @@ bool Controller :: BFS( Pawns * P  )
         }
     }
    
-    queue <Place *> To_Visit;
+    queue <pair<Place *, int>> To_Visit;
     To_Visit.push(start);
-    start->Set_Mark(true);
+    start.first->Set_Mark(true);
     
     int a , b;
     while(!To_Visit.empty())
     {
-        if(To_Visit.front()->getRow() == Finish) return true; 
         Current = To_Visit.front();
-        Row = Current->getRow();
-        Col = Current->getCol(); 
+        if(Current.first->getRow() == Finish) return {true ,Current.second }; 
+        Row = Current.first->getRow();
+        Col = Current.first->getCol(); 
         To_Visit.pop();
         neighbours = getValidMoves(Row , Col);
         for(int i = 0; i < neighbours.size(); i++)
@@ -212,11 +227,11 @@ bool Controller :: BFS( Pawns * P  )
                 if(!boardData[a][b]->Get_Mark())
                 {
                      boardData[a][b]->Set_Mark(true);
-                     To_Visit.push(boardData[a][b]);
+                     To_Visit.push({boardData[a][b], Current.second +1});
                 }
             }
     }
-    return false;
+    return {false , -1};
 }
 void Controller::recordPawnMove(Pawns* p, Place* oldPlace, Place* newPlace) 
 {
@@ -267,4 +282,84 @@ void Controller::Show_Invalid_window()
     Invalid_Placemnt_Label->setAlignment(AlignCenter);
     Invalid_Placemnt_Label->setStyleSheet("font-weight: bold;");
     Invalid_Placement_Widget->show();
+}
+void Controller::AI_Algorithm(Pawns * P1 , Pawns * P2)
+{
+    int Minimum_Steps = BFS(P2).second ;
+    if(Minimum_Steps > BFS(P1).second&& p2FencesLeft > 0)
+    {
+        int max_P1_path = -1;
+        int best_fence_r = -1;
+        int best_fence_c = -1;
+        bool best_is_horizontal = true;
+        for (int r = 0; r < 8; r++) {
+            for (int c = 0; c < 8; c++) {
+                if (canPlaceFence(r, c, true)) {
+                    hFences[r][c] = true; 
+                    if (BFS(P1).first == true && BFS(P2).first == true) {
+                        int p1_distance = BFS(P1).second;
+                        if (p1_distance > max_P1_path) {
+                            max_P1_path = p1_distance;
+                            best_fence_r = r;
+                            best_fence_c = c;
+                            best_is_horizontal = true;
+                        }
+                    }
+                    hFences[r][c] = false; 
+                }
+                if (canPlaceFence(r, c, false)) {
+                    vFences[r][c] = true; 
+                    
+                    if (BFS(P1).first == true && BFS(P2).first == true) {
+                        int p1_distance = BFS(P1).second;
+                        
+                        if (p1_distance > max_P1_path) {
+                            max_P1_path = p1_distance;
+                            best_fence_r = r;
+                            best_fence_c = c;
+                            best_is_horizontal = false;
+                        }
+                    }
+                    vFences[r][c] = false;
+                }
+            }
+        }
+        Fences * Choosen_Fence ;
+        if(best_is_horizontal)
+        {
+        Choosen_Fence= hboardFences[best_fence_r][best_fence_c];
+        emit  Choosen_Fence -> fenceClicked(Choosen_Fence , true) ;
+        }
+        else
+        {
+            Choosen_Fence= vboardFences[best_fence_r][best_fence_c];
+            emit Choosen_Fence->fenceClicked(Choosen_Fence, true);
+        }
+    }
+    else {
+    Place * Current_Location = P2->Get_Position();
+    Pawns * Doll_Pawn = new Pawns(nullptr);
+    Doll_Pawn->Set_Position(Current_Location); 
+    Doll_Pawn->Set_Finish( P2->Get_Finish() );
+    Current_Location->Set_Has_Pawn(false);
+    Place * Step;
+    Place * Suggested;
+    int Minimum_Suggested=0;
+    vector<pair<int, int>> Available_Moves =  getValidMoves(Current_Location->getRow(), Current_Location-> getCol());
+    for(int i=0; i < Available_Moves.size(); i++)
+    {
+        Suggested = boardData[Available_Moves[i].first][Available_Moves[i].second];
+        Doll_Pawn->Set_Position(Suggested);
+        Minimum_Suggested = BFS(Doll_Pawn).second;
+        
+        if(Minimum_Suggested== Minimum_Steps-1 || Minimum_Suggested== 0)
+        {
+            Current_Location->Set_Has_Pawn(true);
+               emit Suggested->Move_Pawn(Suggested , true);
+               emit Suggested -> Clean();
+              break;
+        }
+    }
+    delete Doll_Pawn;
+}
 }

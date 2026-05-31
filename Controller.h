@@ -22,7 +22,9 @@ private:
 
 public:
     Controller();
-    void start(); 
+    void start();
+    bool AI_Mode = false; 
+    void AI_Algorithm(Pawns * P1 , Pawns * P2);
     vector<pair<int, int>> getValidMoves(int row, int col);
     bool isPlayer1Turn() const;
     void switchTurn();
@@ -31,11 +33,13 @@ public:
     int getP1Fences() const;
     int getP2Fences() const;
     Place* boardData[9][9] = {nullptr , nullptr};
+    Fences * hboardFences[8][8] = {nullptr , nullptr};
+    Fences * vboardFences[8][8] = {nullptr , nullptr};
     void Pawn_Meet(int row , int col , int Relative , vector<pair<int, int>>& valid_moves);
     void detachWindows() {
     Win = nullptr;
     Game = nullptr;}
-    bool BFS( Pawns * P);
+    pair<bool , int> BFS( Pawns * P);
     stack<Move> moveStack;
     stack<Move> redoStack;
     void recordPawnMove(Pawns* p, Place* oldPlace, Place* newPlace);
@@ -43,4 +47,8 @@ public:
     Move popLastMove();
     void undoFence(int r, int c, bool isH, bool playerTurn);
     void Show_Invalid_window();
+    void Switch_Window(Button* a , Button * b ,  widget* first, widget* second);
+    Pawns * p1;
+    Pawns * p2;
+    
 };

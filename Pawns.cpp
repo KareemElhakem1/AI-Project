@@ -1,10 +1,12 @@
 #include "Pawns.h"
 Pawns :: Pawns(widget * parent) : QWidget(parent)
 {
+    Parent = parent;
     this->raise();
 }
 void Pawns :: mousePressEvent(mevent * event)
 {
+    if(Parent == nullptr) return;
     if (event->button() == LeftButton && Press_Id == Turn) {
         Is_Pressed = true;    
         emit pawnClicked(this);
@@ -48,4 +50,8 @@ int Pawns::Get_Finish()
 void Pawns::Set_Finish(int x)
 {
     Finish_Row = x;
+}
+void Pawns :: Set_Position(Place * a)
+{
+    position = a;
 }

@@ -1,8 +1,7 @@
 #pragma once
-class Pawns;
-class Place;
-class Fences;
-
+#include "Pawns.h"
+#include "Fences.h"
+#include "Place.h"
 class Move {
 public:
     bool isFence;

@@ -11,6 +11,7 @@ Choose_Mode_Window :: Choose_Mode_Window()
     Mode_Buttons->addWidget(AI_Mode);
     Mode_Buttons->setAlignment(AlignCenter);
     this->setLayout(Mode_Buttons);
+    
 }
 void Choose_Mode_Style(widget * home)
 {

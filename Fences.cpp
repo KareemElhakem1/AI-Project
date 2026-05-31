@@ -12,7 +12,7 @@ Fences::Fences(int r, int c, bool horizontal, QWidget* parent)
 void Fences::mousePressEvent(QMouseEvent* event) {
     
     
-    emit fenceClicked(this); 
+    emit fenceClicked(this , false); 
 }
 
 void Fences::placeVisually() {

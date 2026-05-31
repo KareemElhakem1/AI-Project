@@ -10,8 +10,6 @@ private:
     
 public:
     Fences(int r, int c, bool horizontal, QWidget* parent = nullptr);
-    
-    // Add these three Getters!
     int getRow() const;
     int getCol() const;
     bool getIsHorizontal() const;
@@ -19,7 +17,7 @@ public:
     void resetVisually();
     
 signals:
-    void fenceClicked(Fences* f); 
+    void fenceClicked(Fences* f , bool x); 
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;

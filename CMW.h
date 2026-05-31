@@ -8,8 +8,11 @@ class Choose_Mode_Window : public widget{
     Button* AI_Mode = new Button("AI is your friend");
     public:
     Choose_Mode_Window();
-    Button * get_button()
+    Button * get_button( bool a)
     {
+        if(a)
         return this->Friend_Mode;
+        return this->AI_Mode;
     }
+
 };

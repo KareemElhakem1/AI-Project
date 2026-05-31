@@ -24,6 +24,7 @@ class Game_Window : public widget{
     Button* Main_Menu_Btn;
     Button* Undo_Btn;
     Button* Redo_Btn;
+    label * Turn_Label;
     protected:
     void paintEvent(QPaintEvent* event) override {
         QStyleOption opt;
@@ -40,4 +41,5 @@ class Game_Window : public widget{
     void Clean_V();
     void Update_UI();
     void Trigger_Win(int winner_player);
+    
 };

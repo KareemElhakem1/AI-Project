@@ -17,9 +17,10 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
     this->setFixedSize(1200, 600);
     this->setObjectName("Game");
     Game_Style(this);
-
     P1 = new Pawns(this);
     P2 = new Pawns(this);
+    myController->p1 = P1;
+    myController->p2 = P2;
     P2->Set_Finish(8);
     P1->setAttribute(Qt::WA_StyledBackground, true);
     P2->setAttribute(Qt::WA_StyledBackground, true);
@@ -38,19 +39,22 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
         this->Valid_Moves(p);
     });}; 
 
-    auto Pawn_Motion_Connection = [this](Place * a , Pawns * pawn ){
-        connect(a, &Place::Move_Pawn, this, [this, pawn, a]() {
+    auto Pawn_Motion_Connection = [this](Place * a , Pawns * pawn  ){
+        connect(a, &Place::Move_Pawn, this, [this, pawn](Place * emmited , bool x) {
+            if(myController-> AI_Mode && pawn == P2 && x == false)  return;
+            if(x == true && pawn == P1) { return; }
             Place* oldPos = pawn->Get_Position();
-            pawn->movepawn(a , false); 
-            if (pawn->Get_Position() == a && oldPos != a) {
-                myController->recordPawnMove(pawn, oldPos , a);
+            pawn->movepawn(emmited , x); 
+            if (pawn->Get_Position() == emmited && oldPos != emmited) {
+                myController->recordPawnMove(pawn, oldPos , emmited);
                 this->Clean_V();          
                 if (myController) {
                     myController->switchTurn(); 
+                    this->Update_UI();
                 }
-                if (pawn == P1 && a->getRow() == 0) {
+                if (pawn == P1 && emmited->getRow() == 0) {
                     this->Trigger_Win(1);
-                } else if (pawn == P2 && a->getRow() == 8) {
+                } else if (pawn == P2 && emmited->getRow() == 8) {
                     this->Trigger_Win(2);
                 }
             }
@@ -58,7 +62,8 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
     };
     auto Clean_Valid = [this] (Place * a){connect(a ,&Place::Clean , this , &Game_Window::Clean_V);};
     auto Fence_Connection = [this](Fences * f){
-        connect(f, &Fences::fenceClicked, this, [this](Fences* clickedFence) {
+        connect(f, &Fences::fenceClicked, this, [this](Fences* clickedFence , bool x) {
+            if(myController-> AI_Mode && Pawns::Turn == true && x == false) return;
             if (myController == nullptr || clickedFence == nullptr) return; 
             bool Fence_Owner = Pawns::Turn;
 
@@ -74,7 +79,7 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
        
                 this->Clean_V(); 
                 myController->switchTurn();       
-                
+                this->Update_UI();
             }
         });
     };
@@ -90,6 +95,7 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
             
             if (row < 8 && col < 8) {
                 Fences* hFence = new Fences(row, col, true, this);
+                
                 Board_Layout->addWidget(hFence, row * 2 + 1, col * 2, 1, 3);
                 hFence->raise(); 
                 Fence_Connection(hFence);
@@ -99,6 +105,9 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
                 vFence->raise(); 
                 Fence_Connection(vFence);
                 
+                myController -> hboardFences[row][col] = hFence;
+                myController -> vboardFences[row][col] = vFence;
+
                 widget * spacer = new widget(this);
                 spacer->setFixedSize(10, 10);
                 spacer->setStyleSheet("background-color: transparent;");
@@ -233,7 +242,6 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
     Right_Middle->setStyleSheet("QWidget#RightMiddle { background-color: rgba(0, 0, 0, 150); border-radius: 20px; }");
     
     vbox * Right_Middle_Layout = new vbox(Right_Middle);
-    
     label * P2_Name = new label("Player 2", Right_Middle);
     P2_Name->setStyleSheet("color: #f54803; font-size: 26px; font-weight: bold; background: transparent;");
     P2_Name->setAlignment(AlignCenter);
@@ -249,8 +257,18 @@ Game_Window::Game_Window(Controller* Master_Controller, widget *parent)
     Right_Middle_Layout->addWidget(P2_Fences_Label);
 
     widget * Right_Bottom = new widget(Right);
+    vbox* Right_Bottom_Layout = new vbox(Right_Bottom);
     Right_Bottom->setStyleSheet("background: transparent;");
+    widget* Turn_Card = new widget(Right_Bottom);
+    Turn_Card->setObjectName("TurnCard");
+    Turn_Card->setStyleSheet("QWidget#TurnCard { background-color: rgba(0, 0, 0, 150); border-radius: 20px; }");
+    vbox* Turn_Card_Layout = new vbox(Turn_Card);
 
+    Turn_Label = new label("Player 1's Turn", Turn_Card);
+    Turn_Label->setStyleSheet("color: #048eeb; font-size: 18px; font-weight: bold; background: transparent;");
+    Turn_Label->setAlignment(AlignCenter);
+    Turn_Card_Layout->addWidget(Turn_Label);
+    Right_Bottom_Layout->addWidget(Turn_Card, 0, AlignBottom | AlignRight);
     Right_VBox->addWidget(Right_Top);
     Right_VBox->addWidget(Right_Middle);
     Right_VBox->addWidget(Right_Bottom);
@@ -279,6 +297,7 @@ void Game_Window::showEvent(QShowEvent* event) {
             P2->movepawn(myController->boardData[0][4] , true);
             P2->raise();
         }
+         this->Update_UI();
     });
 }
 
@@ -328,6 +347,15 @@ void Game_Window::Update_UI()
     {
         P1_Fences_Label->setText("Fences: " + QString::number(myController->getP1Fences()));
         P2_Fences_Label->setText("Fences: " + QString::number(myController->getP2Fences()));
+    }
+    if (Turn_Label != nullptr) {
+        if (!Pawns::Turn) { 
+            Turn_Label->setText("Player 1's Turn");
+            Turn_Label->setStyleSheet("color: #048eeb; font-size: 18px; font-weight: bold; background: transparent;");
+        } else {
+            Turn_Label->setText("Player 2's Turn");
+            Turn_Label->setStyleSheet("color: #f54803; font-size: 18px; font-weight: bold; background: transparent;");
+        }
     }
 }
 
