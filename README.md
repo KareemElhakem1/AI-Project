@@ -17,3 +17,25 @@ Jumping behind the pawn
 ![alt text](image-4.png)
 If there is a wall behind the other player
 ![alt text](image-5.png)
+If there is a wall behind the other player and another one to the diagonal
+![alt text](image-6.png)
+Player winning
+![alt text](image-7.png)
+Before undo
+![alt text](image-8.png)
+After undo
+![alt text](image-9.png)
+After Redo
+![alt text](image-10.png)
+We can undo till the start of the game, and redo till the current move
+The Main Menu button goes back to the mode choosing window and resets the modes
+
+Preventing closing the baseline
+![alt text](image-11.png)
+After trying to close:
+![alt text](image-12.png)
+
+The AI Mode works by Breadth First Search, where if the minimum path for the player is less than for the AI, the AI starts placing fences and it places them in the places that maximize the minimum path for the player, if the AI fences are all used or the player's minimum path is greater than the AI's minimum path, the AI moves on its minimum path.
+![alt text](image-13.png)
+
+#

@@ -28,7 +28,6 @@ void Controller::Switch_Window(Button* a , Button * b ,  widget* first, widget* 
  QObject::connect(a, &Button::clicked, [=]() {
     if (first != nullptr && second != nullptr) {
         AI_Mode = false;
-        cout <<"False";
         first->hide();
         second->show();
     }
@@ -36,7 +35,6 @@ void Controller::Switch_Window(Button* a , Button * b ,  widget* first, widget* 
  QObject::connect(b, &Button::clicked, [=]() {
     if (first != nullptr && second != nullptr) {
         AI_Mode = true;
-        if (AI_Mode) cout <<"aaa9";
         first->hide();
         second->show();
     }
