@@ -38,4 +38,5 @@ After trying to close:
 The AI Mode works by Breadth First Search, where if the minimum path for the player is less than for the AI, the AI starts placing fences and it places them in the places that maximize the minimum path for the player, if the AI fences are all used or the player's minimum path is greater than the AI's minimum path, the AI moves on its minimum path.
 ![alt text](image-13.png)
 
-#
+#Demo Video Link:
+https://drive.google.com/file/d/1sMfCG7sMWwVy2OQ648BJl3oU3o1O3Tiy/view?usp=sharing
