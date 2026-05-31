@@ -1,2 +1,10 @@
 # AI-Project
 This Repository is dedicated to my AI course project
+
+#Game Description
+
+Quoridor is a 2-player strategy board game played on a 9×9 grid. Each player starts on opposite sides and races to reach the other side's baseline. On your turn you can either move your pawn one square in any direction orthogonally, or place one of your fences to block your opponent's path. You have 10 fences each, if two pawns face each other the player who's turn is to play can jump behind the other player's pawn, if there is no wall behind that pawn, if there is a wall, then the player can move diagonally in direction of that other pawn, given that there are no extra walls cutting that step. You can never completely seal off your opponent's path to the goal. First player to reach the opposite baseline wins.
+
+#Screenshots
+
+![alt text](image.png)
