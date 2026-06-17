@@ -1,5 +1,5 @@
 # AI-Project
-This Repository is dedicated to my AI course project
+This Repository is dedicated to my Quoridor game project
 
 #Game Description
 
